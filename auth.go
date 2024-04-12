@@ -1,18 +1,18 @@
 package atol_client
 
 type (
-	AuthRequestMessage struct {
+	authRequestMessage struct {
 		Login string `json:"login"`
 		Pass  string `pass:"pass"`
 	}
 
-	AuthResponseMessage struct {
-		Error     *AuthError `json:"error"`
+	authResponseMessage struct {
+		Error     *authError `json:"error"`
 		Token     string     `json:"token"`
 		Timestamp string     `json:"timestamp"`
 	}
 
-	AuthError struct {
+	authError struct {
 		ErrorID string `json:"error_id"`
 		Code    int64  `json:"code"`
 		Text    string `json:"text"`
