@@ -3,7 +3,7 @@ package atol_client
 type (
 	authRequestMessage struct {
 		Login string `json:"login"`
-		Pass  string `pass:"pass"`
+		Pass  string `json:"pass"`
 	}
 
 	authResponseMessage struct {

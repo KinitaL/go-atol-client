@@ -1,10 +1,8 @@
 package atol_client
 
-import "context"
-
 type ATOLClient interface {
-	PostReceipt()
+	PostReceipt(request *PostReceiveRequestMessage) (*PostReceiptMessageResponse, error)
 	Callback()
 	PutReceipt()
-	GetReceipt(ctx context.Context, request *GetReceiptRequestMessage) (*ReceiptMessage, error)
+	GetReceipt(request *GetReceiptRequestMessage) (*ReceiptMessage, error)
 }
