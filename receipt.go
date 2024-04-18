@@ -1,5 +1,8 @@
 package atol_client
 
+// TODO json schema validation
+// TODO enum types
+
 type Status string
 type ErrorSourceType string
 type AgentType string
@@ -57,26 +60,26 @@ type (
 	}
 
 	ReceiptMessagePayload struct {
-		FiscalReceiptNumber     int    `json:"fiscal_receipt_number"`
-		ShiftNumber             int    `json:"shift_number"`
-		ReceiptDatetime         string `json:"receipt_datetime"`
-		Total                   int    `json:"total"`
-		FNNumber                string `json:"fn_number"`
-		ECRRegistrationNumber   string `json:"ecr_registration_number"`
-		FiscalDocumentNumber    int    `json:"fiscal_document_number"`
-		FiscalDocumentAttribute int    `json:"fiscal_document_attribute"`
-		FNSSite                 string `json:"fns_site"`
-		OFDINN                  string `json:"ofd_inn"`
-		OFDReceiptURL           string `json:"ofd_receipt_url"`
+		FiscalReceiptNumber     int     `json:"fiscal_receipt_number"`
+		ShiftNumber             int     `json:"shift_number"`
+		ReceiptDatetime         string  `json:"receipt_datetime"`
+		Total                   float64 `json:"total"`
+		FNNumber                string  `json:"fn_number"`
+		ECRRegistrationNumber   string  `json:"ecr_registration_number"`
+		FiscalDocumentNumber    int     `json:"fiscal_document_number"`
+		FiscalDocumentAttribute int     `json:"fiscal_document_attribute"`
+		FNSSite                 string  `json:"fns_site"`
+		OFDINN                  string  `json:"ofd_inn"`
+		OFDReceiptURL           string  `json:"ofd_receipt_url"`
 	}
 
 	PostReceiveRequestMessage struct {
-		Operation  Operation  `json:"operation"` // used to build request url
-		Timestamp  string     `json:"timestamp"`
-		Service    Service    `json:"service"`
-		ExternalID string     `json:"external_id"`
-		Receipt    Receipt    `json:"receipt"`
-		Correction Correction `json:"correction"` // instead of receipt or vice versa
+		Operation  Operation   `json:"operation" validate:"required"` // used to build request url
+		Timestamp  string      `json:"timestamp" validate:"required"`
+		Service    *Service    `json:"service,omitempty"`
+		ExternalID string      `json:"external_id" validate:"required"`
+		Receipt    *Receipt    `json:"receipt,omitempty"`
+		Correction *Correction `json:"correction,omitempty"` // instead of receipt or vice versa
 	}
 
 	Service struct {
@@ -84,12 +87,12 @@ type (
 	}
 
 	Correction struct {
-		Company        Company        `json:"company"`
-		Payments       []Payment      `json:"payments"`
-		Vats           []Vat          `json:"vats"`
-		DeviceNumber   string         `json:"device_number"`
-		Cashier        string         `json:"cashier"`
-		CorrectionInfo CorrectionInfo `json:"correction_info"`
+		Company        *Company        `json:"company"`
+		Payments       []Payment       `json:"payments"`
+		Vats           []Vat           `json:"vats"`
+		DeviceNumber   string          `json:"device_number"`
+		Cashier        string          `json:"cashier"`
+		CorrectionInfo *CorrectionInfo `json:"correction_info"`
 	}
 
 	CorrectionInfo struct {
@@ -99,15 +102,18 @@ type (
 	}
 
 	Receipt struct {
-		Client               Client              `json:"client"`
-		Company              Company             `json:"company"`
-		AgentInfo            AgentInfo           `json:"agent_info"`
-		SupplierInfo         SupplierInfo        `json:"supplier_info"`
-		Total                int                 `json:"total"`
-		AdditionalCheckProps string              `json:"additional_check_props"`
-		Cashier              string              `json:"cashier"`
-		DeviceNumber         string              `json:"device_number"`
-		AdditionalUserProps  AdditionalUserProps `json:"additional_user_props"`
+		Client               *Client              `json:"client" validate:"required"`
+		Company              *Company             `json:"company" validate:"required"`
+		AgentInfo            *AgentInfo           `json:"agent_info,omitempty"`
+		SupplierInfo         *SupplierInfo        `json:"supplier_info,omitempty"`
+		Items                []Item               `json:"items" validate:"required"`
+		Payments             []Payment            `json:"payments" validate:"required"`
+		Vats                 []Vat                `json:"vats,omitempty"`
+		Total                float64              `json:"total" validate:"required"`
+		AdditionalCheckProps string               `json:"additional_check_props,omitempty"`
+		Cashier              string               `json:"cashier,omitempty"`
+		DeviceNumber         string               `json:"device_number,omitempty"`
+		AdditionalUserProps  *AdditionalUserProps `json:"additional_user_props,omitempty"`
 	}
 
 	Client struct {
@@ -119,17 +125,17 @@ type (
 
 	Company struct {
 		Email          string `json:"email"`
-		SNO            string `json:"SNO"`
-		INN            string `json:"INN"`
-		PaymentAddress string `json:"payment_address"`
+		SNO            string `json:"sno"`
+		INN            string `json:"inn" validate:"required"`
+		PaymentAddress string `json:"payment_address" validate:"required"`
 		Location       string `json:"location"`
 	}
 
 	AgentInfo struct {
-		Type                    AgentType               `json:"type"`
-		PayingAgentInfo         PayingAgentInfo         `json:"paying_agent"`
-		ReceivePaymentsOperator ReceivePaymentsOperator `json:"receive_payments_operator"`
-		MoneyTransferObject     MoneyTransferObject     `json:"money_transfer_object"`
+		Type                    *AgentType               `json:"type,omitempty"`
+		PayingAgentInfo         *PayingAgentInfo         `json:"paying_agent,omitempty"`
+		ReceivePaymentsOperator *ReceivePaymentsOperator `json:"receive_payments_operator,omitempty"`
+		MoneyTransferObject     *MoneyTransferObject     `json:"money_transfer_object,omitempty"`
 	}
 
 	PayingAgentInfo struct {
@@ -149,33 +155,30 @@ type (
 	}
 
 	SupplierInfo struct {
-		Phones   []string     `json:"phones"`
-		Items    []SupplyItem `json:"items"`
-		Payments []Payment    `json:"payments"`
-		Vats     []Vat        `json:"vats"`
+		Phones []string `json:"phones"`
 	}
 
-	SupplyItem struct {
-		Name              string            `json:"name"`
-		Price             int               `json:"price"`
-		Quantity          int               `json:"quantity"`
-		Sum               int               `json:"sum"`
-		MeasurementUnit   string            `json:"measurement_unit"`
-		MeasurementCode   string            `json:"measurement_code"`
-		PaymentMethod     string            `json:"payment_method"`
-		PaymentObject     string            `json:"payment_object"`
-		Vat               Vat               `json:"vat"`
-		AgentInfo         AgentInfo         `json:"agent_info"`
-		SupplierInnerInfo SupplierInnerInfo `json:"supplier_info"`
-		UserData          string            `json:"user_data"`
-		Excise            int               `json:"excise"`
-		CountryCode       string            `json:"country_code"`
-		DeclarationNumber string            `json:"declaration_number"`
+	Item struct {
+		Name              string             `json:"name" validate:"required"`
+		Price             float64            `json:"price" validate:"required"`
+		Quantity          float64            `json:"quantity" validate:"required"`
+		Sum               float64            `json:"sum" validate:"required"`
+		MeasurementUnit   string             `json:"measurement_unit,omitempty"`
+		MeasurementCode   string             `json:"measurement_code,omitempty"`
+		PaymentMethod     string             `json:"payment_method,omitempty"`
+		PaymentObject     string             `json:"payment_object,omitempty"`
+		Vat               *Vat               `json:"vat,omitempty"`
+		AgentInfo         *AgentInfo         `json:"agent_info,omitempty"`
+		SupplierInnerInfo *SupplierInnerInfo `json:"supplier_info,omitempty"`
+		UserData          string             `json:"user_data,omitempty"`
+		Excise            int                `json:"excise,omitempty"`
+		CountryCode       string             `json:"country_code,omitempty"`
+		DeclarationNumber string             `json:"declaration_number,omitempty"`
 	}
 
 	Vat struct {
-		Type string `json:"type"`
-		Sum  int    `json:"sum"`
+		Type string  `json:"type,omitempty"`
+		Sum  float64 `json:"sum,omitempty"`
 	}
 
 	SupplierInnerInfo struct {
@@ -185,13 +188,13 @@ type (
 	}
 
 	Payment struct {
-		Type int `json:"type"`
-		Sum  int `json:"sum"`
+		Type int     `json:"type" validate:"required"`
+		Sum  float64 `json:"sum" validate:"required"`
 	}
 
 	AdditionalUserProps struct {
-		Name  string `json:"name"`
-		Value string `json:"value"`
+		Name  string `json:"name" validate:"required"`
+		Value string `json:"value" validate:"required"`
 	}
 
 	PostReceiptMessageResponse struct {

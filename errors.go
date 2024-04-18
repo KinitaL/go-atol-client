@@ -5,10 +5,11 @@ import "fmt"
 type ErrorType string
 
 const (
-	AuthErrorType     ErrorType = "auth"
-	JsonErrorType     ErrorType = "json"
-	ParsingErrorType  ErrorType = "parsing"
-	ExternalErrorType ErrorType = "external"
+	AuthErrorType       ErrorType = "auth"
+	JsonErrorType       ErrorType = "json"
+	ParsingErrorType    ErrorType = "parsing"
+	ExternalErrorType   ErrorType = "external"
+	ValidationErrorType ErrorType = "validation"
 )
 
 type ATOLClientError struct {
@@ -31,6 +32,10 @@ func NewParsingError(msg string, isInner bool) *ATOLClientError {
 
 func NewExternalError(msg string, isInner bool) *ATOLClientError {
 	return newATOLClientError(ExternalErrorType, msg, isInner)
+}
+
+func NewValidationError(msg string, isInner bool) *ATOLClientError {
+	return newATOLClientError(ValidationErrorType, msg, isInner)
 }
 
 func newATOLClientError(errType ErrorType, msg string, isInner bool) *ATOLClientError {
